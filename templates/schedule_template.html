@@ -170,32 +170,6 @@
     100% { outline: 3px solid transparent; outline-offset: -3px; }
   }
 
-  /* ── Modal ── */
-  .modal-overlay {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
-  }
-  .modal-overlay.visible { display: flex; }
-  .modal-content {
-    background: white; border-radius: 12px; padding: 28px; max-width: 480px; width: 90%;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-  }
-  .modal-content h2 { font-size: 1.2rem; margin-bottom: 16px; color: #0f172a; }
-  .modal-content label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px; margin-top: 12px; }
-  .modal-content input {
-    width: 100%; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px;
-    font-size: 0.85rem; font-family: inherit;
-  }
-  .modal-content input:focus { outline: none; border-color: #3b82f6; }
-  .modal-content .hint { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-  .modal-actions button {
-    padding: 8px 18px; border-radius: 6px; font-size: 0.85rem;
-    font-weight: 600; cursor: pointer; border: none;
-  }
-  .modal-btn-cancel { background: #e2e8f0; color: #334155; }
-  .modal-btn-save { background: #3b82f6; color: white; }
-
   /* ── Notification ── */
   .notification {
     position: fixed; top: 20px; right: 20px; z-index: 2000;
@@ -245,7 +219,7 @@
   <span class="changes-count" id="changes-count">0 changes</span>
   <button class="btn-undo" id="undo-btn">Undo Last</button>
   <button class="btn-reset" id="reset-btn">Reset All</button>
-  <button class="btn-propose" id="propose-btn">Propose Changes (Create PR)</button>
+  <button class="btn-propose" id="propose-btn">Propose Changes</button>
 </div>
 
 <div class="legend">
@@ -281,26 +255,6 @@
 </div>
 
 <div class="stats" id="stats"></div>
-
-<!-- GitHub settings modal -->
-<div class="modal-overlay" id="github-modal">
-  <div class="modal-content">
-    <h2>GitHub Settings</h2>
-    <p style="font-size:0.8rem;color:#64748b;margin-bottom:8px">Configure to create PRs with your schedule change proposals.</p>
-    <label for="gh-repo">Repository</label>
-    <input id="gh-repo" placeholder="owner/repo" value="1kevgriff/StirTrek2026ScheduleBuilder5000TM" />
-    <div class="hint">e.g. 1kevgriff/StirTrek2026ScheduleBuilder5000TM</div>
-    <label for="gh-token">Personal Access Token</label>
-    <input id="gh-token" type="password" placeholder="ghp_..." />
-    <div class="hint">Needs <code>repo</code> scope. Stored in your browser only.</div>
-    <label for="gh-branch">Base Branch</label>
-    <input id="gh-branch" value="master" />
-    <div class="modal-actions">
-      <button class="modal-btn-cancel" id="gh-cancel">Cancel</button>
-      <button class="modal-btn-save" id="gh-save">Save</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ─── Injected Data (replaced by schedule_builder.py) ───
@@ -672,171 +626,41 @@ document.getElementById("reset-btn").addEventListener("click", () => {
   showNotification("Reset all changes", "info");
 });
 
-// ─── GitHub Settings ───
-function loadGHSettings() {
-  try { return JSON.parse(localStorage.getItem("stirtrek-gh") || "{}"); }
-  catch { return {}; }
-}
+// ─── GitHub Repo ───
+const githubRepo = "__GITHUB_REPO__";
 
-function saveGHSettings(settings) {
-  localStorage.setItem("stirtrek-gh", JSON.stringify(settings));
-}
-
-function showGitHubModal() {
-  const s = loadGHSettings();
-  document.getElementById("gh-repo").value = s.repo || "1kevgriff/StirTrek2026ScheduleBuilder5000TM";
-  document.getElementById("gh-token").value = s.token || "";
-  document.getElementById("gh-branch").value = s.branch || "master";
-  document.getElementById("github-modal").classList.add("visible");
-}
-
-document.getElementById("gh-save").addEventListener("click", () => {
-  saveGHSettings({
-    repo: document.getElementById("gh-repo").value.trim(),
-    token: document.getElementById("gh-token").value.trim(),
-    branch: document.getElementById("gh-branch").value.trim() || "master"
-  });
-  document.getElementById("github-modal").classList.remove("visible");
-  showNotification("GitHub settings saved", "success");
-});
-
-document.getElementById("gh-cancel").addEventListener("click", () => {
-  document.getElementById("github-modal").classList.remove("visible");
-});
-
-// ─── PR Creation ───
-function buildPRBody() {
-  let md = "## Schedule Swap Proposal\n\n";
-  md += `**${swaps.length} swap${swaps.length === 1 ? "" : "s"}** proposed.\n\n`;
-  md += "### Changes\n\n";
-  swaps.forEach((sw, i) => {
-    const aSession = sessions[sw.aSid];
-    const bSession = sessions[sw.bSid];
-    md += `**${i+1}.** Swapped:\n`;
-    md += `- **${aSession.title}** (${aSession.speakers}) `;
-    md += `\u2014 was ${slotLabels[sw.aSlot]}, ${roomLabel(sw.aPos)}\n`;
-    md += `- **${bSession.title}** (${bSession.speakers}) `;
-    md += `\u2014 was ${slotLabels[sw.bSlot]}, ${roomLabel(sw.bPos)}\n\n`;
-  });
-  md += "### Validation\n\n";
-  const errors = validateSchedule(currentSchedule);
-  if (errors.length === 0) {
-    md += "- No speaker conflicts\n";
-    md += "- All 56 sessions assigned\n";
-  } else {
-    errors.forEach(e => md += `- \u26a0\ufe0f ${e}\n`);
-  }
-  md += "\n---\n*Proposed via the Stir Trek 2026 Schedule Builder*\n";
-  return md;
-}
-
-document.getElementById("propose-btn").addEventListener("click", async () => {
+// ─── Propose Changes (GitHub Issue) ───
+document.getElementById("propose-btn").addEventListener("click", () => {
   if (swaps.length === 0) return;
 
-  const gh = loadGHSettings();
-  if (!gh.repo || !gh.token) {
-    showGitHubModal();
+  const errors = validateSchedule(currentSchedule);
+  if (errors.length > 0) {
+    showNotification("Schedule has errors: " + errors.join("; "), "error");
     return;
   }
 
-  const btn = document.getElementById("propose-btn");
-  btn.textContent = "Creating PR...";
-  btn.disabled = true;
+  const ver = versions[currentVersionIdx];
+  let body = "<!-- SCHEDULE_SWAP -->\n";
+  body += "## Schedule Swap Proposal\n\n";
+  body += `**${swaps.length} swap${swaps.length === 1 ? "" : "s"}** proposed based on v${ver.version}: ${ver.label}.\n\n`;
+  body += "### Changes\n\n";
+  swaps.forEach((sw, i) => {
+    const a = sessions[sw.aSid];
+    const b = sessions[sw.bSid];
+    body += `${i+1}. **${a.title}** (${a.speakers}) in ${slotLabels[sw.aSlot]}, ${roomLabel(sw.aPos)}`;
+    body += ` \u21c4 **${b.title}** (${b.speakers}) in ${slotLabels[sw.bSlot]}, ${roomLabel(sw.bPos)}\n`;
+  });
+  body += "\n### Proposed Schedule\n\n";
+  body += "```json\n";
+  body += JSON.stringify(currentSchedule, null, 2);
+  body += "\n```\n\n";
+  body += "---\n*Proposed via the Stir Trek 2026 Schedule Builder*\n";
 
-  const [owner, repo] = gh.repo.split("/");
-  const base = gh.branch || "master";
-  const headers = {
-    "Authorization": `token ${gh.token}`,
-    "Accept": "application/vnd.github.v3+json"
-  };
+  const title = `Schedule swap: ${swaps.length} change${swaps.length === 1 ? "" : "s"} (v${ver.version})`;
+  const url = `https://github.com/${githubRepo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
 
-  try {
-    // 1. Get base branch SHA
-    const refRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${base}`,
-      { headers }
-    );
-    if (!refRes.ok) throw new Error(`Can't find branch '${base}'. Check repo/branch settings.`);
-    const refData = await refRes.json();
-    const baseSha = refData.object.sha;
-
-    // 2. Create new branch
-    const branchName = `schedule-swap-${Date.now()}`;
-    const branchRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/refs`,
-      {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: `refs/heads/${branchName}`, sha: baseSha })
-      }
-    );
-    if (!branchRes.ok) throw new Error("Failed to create branch. Check token permissions.");
-
-    // 3. Get current schedule.json file SHA
-    const fileRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/output/schedule.json?ref=${base}`,
-      { headers }
-    );
-    if (!fileRes.ok) throw new Error("Can't find output/schedule.json in repo.");
-    const fileData = await fileRes.json();
-
-    // 4. Update schedule.json on new branch
-    const newContent = btoa(unescape(encodeURIComponent(
-      JSON.stringify(currentSchedule, null, 2) + "\n"
-    )));
-    const updateRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/output/schedule.json`,
-      {
-        method: "PUT",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `schedule: swap ${swaps.length} session${swaps.length === 1 ? "" : "s"}`,
-          content: newContent,
-          sha: fileData.sha,
-          branch: branchName
-        })
-      }
-    );
-    if (!updateRes.ok) throw new Error("Failed to update schedule.json.");
-
-    // 5. Create PR
-    const prBody = buildPRBody();
-    const prRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/pulls`,
-      {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `Schedule swap: ${swaps.length} change${swaps.length === 1 ? "" : "s"}`,
-          body: prBody,
-          head: branchName,
-          base: base
-        })
-      }
-    );
-    if (!prRes.ok) {
-      const err = await prRes.json();
-      throw new Error(err.message || "Failed to create PR.");
-    }
-    const prData = await prRes.json();
-
-    showNotification(
-      `PR created! <a href="${prData.html_url}" target="_blank">${prData.html_url}</a>`,
-      "success",
-      10000
-    );
-
-    // Reset swaps after successful PR
-    originalSchedule = JSON.parse(JSON.stringify(currentSchedule));
-    swaps = [];
-    updateChangesBar();
-    render();
-  } catch (err) {
-    showNotification(`Error: ${err.message}`, "error", 8000);
-  } finally {
-    btn.textContent = "Propose Changes (Create PR)";
-    btn.disabled = false;
-  }
+  window.open(url, "_blank");
+  showNotification("Opening GitHub to submit your proposal...", "info");
 });
 
 // ─── Notifications ───

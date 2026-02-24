@@ -42,6 +42,7 @@ JSON_PATH = OUTPUT_DIR / "schedule.json"
 VERSIONS_PATH = OUTPUT_DIR / "versions.json"
 HTML_PATH = OUTPUT_DIR / "schedule.html"
 TEMPLATE_PATH = BASE_DIR / "templates" / "schedule_template.html"
+GITHUB_REPO = "1kevgriff/StirTrek2026ScheduleBuilder5000TM"
 
 SLOT_TIMES = [
     "08:30am - 09:15am",
@@ -485,6 +486,7 @@ def write_html(sessions):
     html = html.replace("__SESSIONS_DATA__", json.dumps(sessions_dict, indent=2))
     html = html.replace("__VERSIONS_DATA__", json.dumps(versions, indent=2))
     html = html.replace("__ATTENDANCE_DATA__", json.dumps(ATTENDANCE_2025, indent=2))
+    html = html.replace("__GITHUB_REPO__", GITHUB_REPO)
 
     with open(HTML_PATH, "w", encoding="utf-8") as f:
         f.write(html)
