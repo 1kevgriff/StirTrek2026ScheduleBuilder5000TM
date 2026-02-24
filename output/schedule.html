@@ -40,8 +40,48 @@
   .subtitle {
     text-align: center;
     color: #64748b;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     font-size: 0.95rem;
+  }
+
+  .version-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .version-bar label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #334155;
+  }
+
+  .version-select {
+    padding: 6px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: white;
+    cursor: pointer;
+    min-width: 280px;
+  }
+
+  .version-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  .version-description {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+    font-style: italic;
+    min-height: 1.2em;
   }
 
   .legend {
@@ -95,27 +135,9 @@
     padding: 12px 6px;
   }
 
-  .header-room-name {
-    display: block;
-    font-size: 0.85rem;
-  }
-
-  .header-capacity {
-    display: block;
-    font-size: 0.95rem;
-    font-weight: 800;
-    margin-top: 2px;
-    color: #f59e0b;
-  }
-
-  .header-theaters {
-    display: block;
-    font-size: 0.6rem;
-    font-weight: 400;
-    color: #94a3b8;
-    margin-top: 3px;
-    line-height: 1.3;
-  }
+  .header-room-name { display: block; font-size: 0.85rem; }
+  .header-capacity { display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px; color: #f59e0b; }
+  .header-theaters { display: block; font-size: 0.6rem; font-weight: 400; color: #94a3b8; margin-top: 3px; line-height: 1.3; }
 
   .time-cell {
     background: #f1f5f9;
@@ -150,19 +172,8 @@
     z-index: 10;
   }
 
-  .session-title {
-    font-weight: 600;
-    font-size: 0.78rem;
-    line-height: 1.3;
-    margin-bottom: 4px;
-  }
-
-  .session-speaker {
-    font-size: 0.72rem;
-    color: #64748b;
-    font-weight: 500;
-  }
-
+  .session-title { font-weight: 600; font-size: 0.78rem; line-height: 1.3; margin-bottom: 4px; }
+  .session-speaker { font-size: 0.72rem; color: #64748b; font-weight: 500; }
   .session-track {
     font-size: 0.65rem;
     margin-top: 4px;
@@ -174,13 +185,19 @@
     max-width: fit-content;
   }
 
-  .break-cell {
-    text-align: center;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
+  .attendance-badge {
+    font-size: 0.6rem;
+    margin-top: 3px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    display: inline-block;
+    font-weight: 600;
+    background: #fef3c7;
+    color: #92400e;
+    max-width: fit-content;
   }
 
+  .break-cell { text-align: center; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; }
   .breakfast-cell { background: var(--breakfast); color: #92400e; }
   .lunch-cell { background: var(--lunch); color: #92400e; }
   .pending-cell { background: var(--pending); color: #9ca3af; font-style: italic; }
@@ -220,25 +237,9 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
 
-  .stat-card h3 {
-    font-size: 0.8rem;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-  }
-
-  .stat-card .value {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #0f172a;
-  }
-
-  .stat-card .detail {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    margin-top: 4px;
-  }
+  .stat-card h3 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .stat-card .value { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+  .stat-card .detail { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
 
   .filter-bar {
     display: flex;
@@ -262,19 +263,13 @@
   .filter-btn:hover { border-color: #94a3b8; }
   .filter-btn.active { border-color: #0f172a; background: #0f172a; color: white; }
 
-  .capacity-bar {
-    width: 100%;
-    height: 3px;
-    background: #e2e8f0;
-    border-radius: 2px;
-    margin-top: 4px;
-    overflow: hidden;
-  }
+  .capacity-bar { width: 100%; height: 3px; background: #e2e8f0; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .capacity-fill { height: 100%; border-radius: 2px; background: #f59e0b; }
 
-  .capacity-fill {
-    height: 100%;
-    border-radius: 2px;
-    background: #f59e0b;
+  .diff-highlight {
+    outline: 3px solid #f59e0b;
+    outline-offset: -3px;
+    background: #fffbeb !important;
   }
 
   @media (max-width: 1200px) {
@@ -283,7 +278,7 @@
 
   @media print {
     body { padding: 0; background: white; }
-    .filter-bar { display: none; }
+    .filter-bar, .version-bar, .version-description { display: none; }
     .session-cell:hover { transform: none; box-shadow: none; }
   }
 </style>
@@ -292,6 +287,13 @@
 
 <h1>Stir Trek 2026</h1>
 <p class="subtitle">May 2, 2026 &mdash; 56 Sessions &bull; 9 Tracks &bull; 7 Time Slots &bull; 8 Rooms &bull; 2,194 Total Seats</p>
+
+<div class="version-bar">
+  <label for="version-picker">Schedule Version:</label>
+  <select id="version-picker" class="version-select"></select>
+  <label style="margin-left:16px"><input type="checkbox" id="diff-toggle"> Highlight changes</label>
+</div>
+<div class="version-description" id="version-desc"></div>
 
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:var(--app-dev)"></div>Application Development</div>
@@ -323,7 +325,6 @@
 <div class="stats" id="stats"></div>
 
 <script>
-// ── Room aliases: update these once published names are known ──
 const rooms = [
   { num: 1, alias: "Room 1",  capacity: 388, live: "Theater 14", simulcast: "12, 13" },
   { num: 2, alias: "Room 2",  capacity: 314, live: "Theater 15", simulcast: "10, 11" },
@@ -396,14 +397,183 @@ const sessions = {
   "1143759": {"title":"Why Tech Debt Never Gets Prioritized (And Why \"Explain the Business Impact\" Won't Fix It)","speakers":"Christine Miao","track":"Professional Growth & Leadership"}
 };
 
-const schedule = {
-  "slot_1": ["1123967","1128028","1130963","1120265","1129837","1120566","1126334","1131041"],
-  "slot_2": ["1119472","1138947","1119405","1124736","1121838","1120833","1130900","1127647"],
-  "slot_3": ["1126959","1129069","1120257","1127279","1125423","1124728","1120202","1127657"],
-  "slot_4": ["1127143","1126337","1124045","1129076","1123424","1125439","1127280","1121847"],
-  "slot_5": ["1127331","1130675","1127299","1120953","1126556","1129012","1126202","1128156"],
-  "slot_6": ["1123968","1121367","1130802","1123888","1143160","1127053","1130920","1130941"],
-  "slot_7": ["1128674","1127535","1143759","1131005","1131023","1130109","1120223","1120206"]
+const versions = [
+  {
+    "version": 1,
+    "label": "Initial generation",
+    "description": "First schedule draft. Room assignments based on track popularity heuristics only.",
+    "created": "2026-02-24T04:00:00Z",
+    "schedule": {
+      "slot_1": [
+        "1123967",
+        "1128028",
+        "1130963",
+        "1120265",
+        "1129837",
+        "1120566",
+        "1126334",
+        "1131041"
+      ],
+      "slot_2": [
+        "1119472",
+        "1138947",
+        "1119405",
+        "1124736",
+        "1121838",
+        "1120833",
+        "1130900",
+        "1127647"
+      ],
+      "slot_3": [
+        "1126959",
+        "1129069",
+        "1120257",
+        "1127279",
+        "1125423",
+        "1124728",
+        "1120202",
+        "1127657"
+      ],
+      "slot_4": [
+        "1127143",
+        "1126337",
+        "1124045",
+        "1129076",
+        "1123424",
+        "1125439",
+        "1127280",
+        "1121847"
+      ],
+      "slot_5": [
+        "1127331",
+        "1130675",
+        "1127299",
+        "1120953",
+        "1126556",
+        "1129012",
+        "1126202",
+        "1128156"
+      ],
+      "slot_6": [
+        "1123968",
+        "1121367",
+        "1130802",
+        "1123888",
+        "1143160",
+        "1127053",
+        "1130920",
+        "1130941"
+      ],
+      "slot_7": [
+        "1128674",
+        "1127535",
+        "1143759",
+        "1131005",
+        "1131023",
+        "1130109",
+        "1120223",
+        "1120206"
+      ]
+    }
+  },
+  {
+    "version": 2,
+    "label": "Attendance-aware rooms",
+    "description": "Room assignments driven by 2025 attendance data. Top draws (Cory House, Kathryn Grayson Nanz, Guy Royse, Matt Eland, Jeff McWherter) placed in Room 1/5. AI/ML sessions prioritized for large rooms.",
+    "created": "2026-02-24T19:50:05Z",
+    "schedule": {
+      "slot_1": [
+        "1123967",
+        "1129012",
+        "1131023",
+        "1120566",
+        "1128674",
+        "1127647",
+        "1138947",
+        "1130963"
+      ],
+      "slot_2": [
+        "1120833",
+        "1119472",
+        "1128156",
+        "1125423",
+        "1130675",
+        "1129069",
+        "1127279",
+        "1131041"
+      ],
+      "slot_3": [
+        "1127143",
+        "1130109",
+        "1125439",
+        "1126337",
+        "1123424",
+        "1126202",
+        "1130941",
+        "1120223"
+      ],
+      "slot_4": [
+        "1120206",
+        "1143160",
+        "1143759",
+        "1127053",
+        "1119405",
+        "1128028",
+        "1121367",
+        "1121838"
+      ],
+      "slot_5": [
+        "1129837",
+        "1127331",
+        "1124728",
+        "1120257",
+        "1123968",
+        "1127657",
+        "1127280",
+        "1123888"
+      ],
+      "slot_6": [
+        "1124045",
+        "1127535",
+        "1120953",
+        "1124736",
+        "1126959",
+        "1127299",
+        "1130900",
+        "1126334"
+      ],
+      "slot_7": [
+        "1120202",
+        "1120265",
+        "1130920",
+        "1126556",
+        "1129076",
+        "1130802",
+        "1121847",
+        "1131005"
+      ]
+    }
+  }
+];
+
+const attendance2025 = {
+  "Kathryn Grayson Nanz": 210,
+  "Guy Royse": 200,
+  "Cory House": 196,
+  "Matt Eland": 157,
+  "Matthew-Hope Eland": 157,
+  "Jeff McWherter": 154,
+  "Tristan Chiappisi": 133,
+  "Barret Blake": 101,
+  "Bob Fornal": 88,
+  "Randy Pagels": 86,
+  "Cameron Presley": 78,
+  "Kelly Morrison": 75,
+  "Amanda Lange": 74,
+  "Sam Basu": 69,
+  "Burton Smith": 65,
+  "Lance Finney": 55,
+  "Brian McKeiver": 48
 };
 
 const slotTimes = [
@@ -415,6 +585,31 @@ const slotTimes = [
   { time: "03:00 - 03:45", label: "Slot 6" },
   { time: "04:00 - 04:45", label: "Slot 7" }
 ];
+
+let currentVersion = versions[versions.length - 1];
+let compareVersion = null;
+let activeFilter = "all";
+let showDiff = false;
+
+// Populate version picker
+const picker = document.getElementById("version-picker");
+versions.forEach((v, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = `v${v.version}: ${v.label} (${v.created.split("T")[0]})`;
+  if (i === versions.length - 1) opt.selected = true;
+  picker.appendChild(opt);
+});
+
+picker.addEventListener("change", () => {
+  currentVersion = versions[parseInt(picker.value)];
+  render();
+});
+
+document.getElementById("diff-toggle").addEventListener("change", (e) => {
+  showDiff = e.target.checked;
+  render();
+});
 
 function trackClass(track) {
   const map = {
@@ -446,11 +641,33 @@ function shortTrack(track) {
   return map[track] || track;
 }
 
-let activeFilter = "all";
+function getDiffSet() {
+  // Build a set of "slot:position" keys that differ from previous version
+  const diffs = new Set();
+  const curIdx = versions.indexOf(currentVersion);
+  if (curIdx <= 0 || !showDiff) return diffs;
+  const prev = versions[curIdx - 1].schedule;
+  const cur = currentVersion.schedule;
+  for (const slot of Object.keys(cur).sort()) {
+    const curIds = cur[slot] || [];
+    const prevIds = prev[slot] || [];
+    for (let i = 0; i < 8; i++) {
+      if (curIds[i] !== prevIds[i]) {
+        diffs.add(`${slot}:${i}`);
+      }
+    }
+  }
+  return diffs;
+}
 
 function render() {
+  const schedule = currentVersion.schedule;
+  const diffs = getDiffSet();
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
+
+  // Version description
+  document.getElementById("version-desc").textContent = currentVersion.description || "";
 
   // Header row
   const timeHeader = document.createElement("div");
@@ -471,30 +688,23 @@ function render() {
     grid.appendChild(h);
   }
 
-  // Breakfast
   addBreakRow("07:30 - 08:30", "Breakfast", "breakfast-cell");
 
-  // Morning slots 1-4
   const slotKeys = Object.keys(schedule).sort();
   for (let i = 0; i < 4; i++) {
-    addSessionRow(slotTimes[i], schedule[slotKeys[i]]);
+    addSessionRow(slotTimes[i], schedule[slotKeys[i]], slotKeys[i], diffs);
   }
 
-  // Lunch
   addBreakRow("12:15 - 01:00", "Lunch", "lunch-cell");
-
-  // Pending
   addBreakRow("01:00 - 01:45", "Pending", "pending-cell");
 
-  // Afternoon slots 5-7
   for (let i = 4; i < 7; i++) {
-    addSessionRow(slotTimes[i], schedule[slotKeys[i]]);
+    addSessionRow(slotTimes[i], schedule[slotKeys[i]], slotKeys[i], diffs);
   }
 
-  // Movie Trailers
   addBreakRow("05:00 - 06:00", "Movie Trailers", "movie-cell");
 
-  renderStats();
+  renderStats(schedule);
 }
 
 function addBreakRow(time, label, cls) {
@@ -511,7 +721,7 @@ function addBreakRow(time, label, cls) {
   }
 }
 
-function addSessionRow(slotInfo, sessionIds) {
+function addSessionRow(slotInfo, sessionIds, slotKey, diffs) {
   const grid = document.getElementById("grid");
   const tc = document.createElement("div");
   tc.className = "cell time-cell";
@@ -522,13 +732,17 @@ function addSessionRow(slotInfo, sessionIds) {
     const s = sessions[sid];
     const tc2 = trackClass(s.track);
     const dimmed = activeFilter !== "all" && s.track !== activeFilter;
+    const isDiff = diffs.has(`${slotKey}:${idx}`);
     const c = document.createElement("div");
-    c.className = `cell session-cell track-${tc2}`;
+    c.className = `cell session-cell track-${tc2}${isDiff ? " diff-highlight" : ""}`;
     if (dimmed) c.style.opacity = "0.15";
+    const att = attendance2025[s.speakers];
+    const attHtml = att ? `<span class="attendance-badge">2025: ${att} attendees</span>` : "";
     c.innerHTML = `
       <div class="session-title">${escHtml(s.title)}</div>
       <div class="session-speaker">${escHtml(s.speakers)}</div>
       <span class="session-track badge-${tc2}">${shortTrack(s.track)}</span>
+      ${attHtml}
     `;
     grid.appendChild(c);
   });
@@ -540,7 +754,7 @@ function escHtml(str) {
   return d.innerHTML;
 }
 
-function renderStats() {
+function renderStats(schedule) {
   const stats = document.getElementById("stats");
   stats.innerHTML = "";
 
