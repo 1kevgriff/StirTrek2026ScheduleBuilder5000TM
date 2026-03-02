@@ -18,7 +18,7 @@ An AI-powered schedule optimizer for [Stir Trek 2026](https://stirtrek.com) that
 - **Attendance-aware room assignments** — 2025 attendance data drives room sizing for returning speakers
 - **Schedule versioning** — every generation is saved; HTML lets you compare versions with diff highlighting
 - **Drag-and-drop scheduling** — rearrange sessions in the HTML view with real-time speaker conflict validation
-- **Community proposals** — drag sessions around, click "Propose Changes", and a GitHub Issue is created automatically. A GitHub Action validates the proposal and opens a PR.
+- **Speaker preferences** — markdown-based preference file for room sizing, time slots, and scheduling constraints
 - **Track filtering** — filter the schedule view by track
 - **Print-friendly** — clean print layout with no UI chrome
 
@@ -63,9 +63,6 @@ python schedule_builder.py --html-only
 │   └── schedule.html                  # Interactive HTML schedule
 ├── templates/
 │   └── schedule_template.html         # HTML template with placeholders
-├── .github/
-│   ├── workflows/process-swap.yml     # Action: validate issue → create PR
-│   └── scripts/process_swap.py        # Extract + validate swap from issue
 ├── schedule_builder.py                # Main script
 ├── rules.md                           # Scheduling rules and room capacities
 └── requirements.txt                   # Just openpyxl
@@ -85,16 +82,6 @@ python schedule_builder.py --html-only
 | Room 8 | 173 | Theater 28 | Theaters 18, 19 |
 
 **Total capacity per slot: 2,194 seats**
-
-## Proposing Schedule Changes
-
-Anyone can propose changes without needing special permissions:
-
-1. Open the [live schedule](https://1kevgriff.github.io/StirTrek2026ScheduleBuilder5000TM/output/schedule.html)
-2. Drag sessions to swap them (speaker conflicts are blocked automatically)
-3. Click **Propose Changes** — a pre-filled GitHub Issue opens
-4. Submit the issue — a GitHub Action validates the schedule and creates a PR
-5. A maintainer reviews and merges
 
 ## Day Schedule
 

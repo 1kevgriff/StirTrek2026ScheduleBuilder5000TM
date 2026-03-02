@@ -66,9 +66,6 @@
   .btn-undo:hover { background: #cbd5e1; }
   .btn-reset { background: #fecaca; color: #991b1b; }
   .btn-reset:hover { background: #fca5a5; }
-  .btn-propose { background: #059669; color: white; padding: 8px 20px !important; font-size: 0.85rem !important; }
-  .btn-propose:hover { background: #047857; }
-  .btn-propose:disabled { background: #9ca3af; cursor: not-allowed; }
 
   /* ── Legend ── */
   .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 24px; }
@@ -219,7 +216,6 @@
   <span class="changes-count" id="changes-count">0 changes</span>
   <button class="btn-undo" id="undo-btn">Undo Last</button>
   <button class="btn-reset" id="reset-btn">Reset All</button>
-  <button class="btn-propose" id="propose-btn">Propose Changes</button>
 </div>
 
 <div class="legend">
@@ -1137,43 +1133,6 @@ document.getElementById("reset-btn").addEventListener("click", () => {
   updateChangesBar();
   render();
   showNotification("Reset all changes", "info");
-});
-
-// ─── GitHub Repo ───
-const githubRepo = "1kevgriff/StirTrek2026ScheduleBuilder5000TM";
-
-// ─── Propose Changes (GitHub Issue) ───
-document.getElementById("propose-btn").addEventListener("click", () => {
-  if (swaps.length === 0) return;
-
-  const errors = validateSchedule(currentSchedule);
-  if (errors.length > 0) {
-    showNotification("Schedule has errors: " + errors.join("; "), "error");
-    return;
-  }
-
-  const ver = versions[currentVersionIdx];
-  let body = "<!-- SCHEDULE_SWAP -->\n";
-  body += "## Schedule Swap Proposal\n\n";
-  body += `**${swaps.length} swap${swaps.length === 1 ? "" : "s"}** proposed based on v${ver.version}: ${ver.label}.\n\n`;
-  body += "### Changes\n\n";
-  swaps.forEach((sw, i) => {
-    const a = sessions[sw.aSid];
-    const b = sessions[sw.bSid];
-    body += `${i+1}. **${a.title}** (${a.speakers}) in ${slotLabels[sw.aSlot]}, ${roomLabel(sw.aPos)}`;
-    body += ` \u21c4 **${b.title}** (${b.speakers}) in ${slotLabels[sw.bSlot]}, ${roomLabel(sw.bPos)}\n`;
-  });
-  body += "\n### Proposed Schedule\n\n";
-  body += "```json\n";
-  body += JSON.stringify(currentSchedule, null, 2);
-  body += "\n```\n\n";
-  body += "---\n*Proposed via the Stir Trek 2026 Schedule Builder*\n";
-
-  const title = `Schedule swap: ${swaps.length} change${swaps.length === 1 ? "" : "s"} (v${ver.version})`;
-  const url = `https://github.com/${githubRepo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-
-  window.open(url, "_blank");
-  showNotification("Opening GitHub to submit your proposal...", "info");
 });
 
 // ─── Notifications ───

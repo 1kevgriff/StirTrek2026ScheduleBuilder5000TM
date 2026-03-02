@@ -42,8 +42,7 @@ JSON_PATH = OUTPUT_DIR / "schedule.json"
 VERSIONS_PATH = OUTPUT_DIR / "versions.json"
 HTML_PATH = OUTPUT_DIR / "schedule.html"
 TEMPLATE_PATH = BASE_DIR / "templates" / "schedule_template.html"
-GITHUB_REPO = "1kevgriff/StirTrek2026ScheduleBuilder5000TM"
-
+PREFERENCES_PATH = BASE_DIR / "data" / "speaker_preferences.md"
 SLOT_TIMES = [
     "08:30am - 09:15am",
     "09:30am - 10:15am",
@@ -128,11 +127,18 @@ def find_multi_session_speakers(sessions):
     return {k: v for k, v in speaker_sessions.items() if len(v) > 1}
 
 
+def load_preferences():
+    """Load speaker preferences markdown. Returns the file contents or empty string."""
+    if PREFERENCES_PATH.exists():
+        return PREFERENCES_PATH.read_text(encoding="utf-8").strip()
+    return ""
+
+
 # ---------------------------------------------------------------------------
 # Prompt generation
 # ---------------------------------------------------------------------------
 
-def build_prompt(sessions, multi_speakers):
+def build_prompt(sessions, multi_speakers, preferences=""):
     session_block = "\n".join(
         f"- ID: {s['id']} | Title: {s['title']} | Speaker: {s['speakers']} "
         f"| Track: {s['track']} | Desc: {s['description']}"
@@ -205,7 +211,10 @@ SOFT CONSTRAINTS (optimize for these):
    - Architecture sessions -> Rooms 2-6
    - Niche/specialized sessions -> Rooms 7 (224) or 8 (173)
    - New speakers with unknown draw -> middle rooms (3, 4, 6, 7)
-
+{f"""
+SPEAKER PREFERENCES (additional constraints from organizers):
+{preferences}
+""" if preferences else ""}
 OUTPUT FORMAT:
 Return ONLY valid JSON, no other text. Use this exact structure:
 {{
@@ -461,7 +470,7 @@ def save_version(schedule, label="", description=""):
 # ---------------------------------------------------------------------------
 
 def write_html(sessions):
-    """Generate schedule.html from template with all versions and drag-and-drop PR support."""
+    """Generate schedule.html from template with all versions and drag-and-drop support."""
     versions = load_versions()
     if not versions:
         print("No versions found; skipping HTML generation.", file=sys.stderr)
@@ -486,7 +495,6 @@ def write_html(sessions):
     html = html.replace("__SESSIONS_DATA__", json.dumps(sessions_dict, indent=2))
     html = html.replace("__VERSIONS_DATA__", json.dumps(versions, indent=2))
     html = html.replace("__ATTENDANCE_DATA__", json.dumps(ATTENDANCE_2025, indent=2))
-    html = html.replace("__GITHUB_REPO__", GITHUB_REPO)
 
     with open(HTML_PATH, "w", encoding="utf-8") as f:
         f.write(html)
@@ -539,8 +547,14 @@ def main():
     for track, count in tracks.most_common():
         print(f"  {track}: {count}", file=sys.stderr)
 
+    # Load speaker preferences
+    preferences = load_preferences()
+    if preferences:
+        print(f"  Loaded speaker preferences from {PREFERENCES_PATH.name}",
+              file=sys.stderr)
+
     # Build prompt (always needed for --prompt mode, useful to log otherwise)
-    prompt = build_prompt(sessions, multi_speakers)
+    prompt = build_prompt(sessions, multi_speakers, preferences)
 
     # --prompt mode: just dump it and exit
     if args.prompt:
