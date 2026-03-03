@@ -19,6 +19,8 @@ import os
 import re
 import subprocess
 import sys
+import threading
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -238,35 +240,77 @@ Use the exact Session Id values provided above."""
 def call_claude(prompt):
     """Call Claude CLI in headless mode. Returns parsed schedule dict."""
     print("Calling Claude CLI to generate schedule...")
+    print(f"  Prompt size: {len(prompt):,} characters")
 
     # Strip CLAUDECODE env var so the CLI doesn't refuse to launch
+    # Raise output token limit so extended thinking doesn't exhaust the default 32K
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+    env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = "128000"
 
-    result = subprocess.run(
+    proc = subprocess.Popen(
         ["claude", "-p", "-", "--output-format", "json",
          "--model", "sonnet", "--max-turns", "1"],
-        input=prompt.encode("utf-8"),
-        capture_output=True,
-        timeout=180,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         env=env,
     )
-    # Decode output as UTF-8
-    result = subprocess.CompletedProcess(
-        result.args, result.returncode,
-        stdout=result.stdout.decode("utf-8", errors="replace") if result.stdout else "",
-        stderr=result.stderr.decode("utf-8", errors="replace") if result.stderr else "",
-    )
 
-    if result.returncode != 0:
-        print(f"Claude CLI error (exit {result.returncode}):")
-        print(result.stderr)
+    # Stream stderr lines in a background thread
+    stderr_lines = []
+    api_error = threading.Event()
+
+    def stream_stderr():
+        for line in proc.stderr:
+            decoded = line.decode("utf-8", errors="replace").rstrip()
+            if decoded:
+                stderr_lines.append(decoded)
+                print(f"  [claude] {decoded}", flush=True)
+                if "API Error" in decoded or "error" in decoded.lower() and "token" in decoded.lower():
+                    api_error.set()
+
+    stderr_thread = threading.Thread(target=stream_stderr, daemon=True)
+    stderr_thread.start()
+
+    # Send prompt and close stdin
+    proc.stdin.write(prompt.encode("utf-8"))
+    proc.stdin.close()
+
+    # Wait with elapsed time display
+    start = time.time()
+    timeout = 900
+    while proc.poll() is None:
+        elapsed = time.time() - start
+        if elapsed > timeout:
+            proc.kill()
+            print(f"\n  Timed out after {timeout}s")
+            sys.exit(1)
+        if api_error.is_set():
+            proc.kill()
+            print(f"\n  API error detected, aborting.")
+            print("\n".join(stderr_lines))
+            sys.exit(1)
+        mins, secs = divmod(int(elapsed), 60)
+        print(f"\r  Waiting for Claude... {mins}:{secs:02d}", end="", flush=True)
+        time.sleep(1)
+
+    elapsed = time.time() - start
+    mins, secs = divmod(int(elapsed), 60)
+    print(f"\r  Claude responded in {mins}:{secs:02d}    ")
+
+    stderr_thread.join(timeout=2)
+    stdout = proc.stdout.read().decode("utf-8", errors="replace")
+
+    if proc.returncode != 0:
+        print(f"Claude CLI error (exit {proc.returncode}):")
+        print("\n".join(stderr_lines))
         sys.exit(1)
 
-    raw = result.stdout.strip()
+    raw = stdout.strip()
     if not raw:
         print("Claude CLI returned empty output.")
-        if result.stderr:
-            print("stderr:", result.stderr[:500])
+        if stderr_lines:
+            print("stderr:", "\n".join(stderr_lines[:10]))
         sys.exit(1)
 
     return parse_claude_response(raw)
@@ -337,13 +381,16 @@ def validate_schedule(schedule, sessions):
 
     assigned_ids = []
     for slot_name in sorted(schedule.keys()):
-        slot_ids = [str(sid) for sid in schedule[slot_name]]
+        slot_ids = schedule[slot_name]
         if len(slot_ids) != 8:
             errors.append(f"{slot_name}: expected 8 sessions, got {len(slot_ids)}")
-        assigned_ids.extend(slot_ids)
 
         speakers_in_slot = []
         for sid in slot_ids:
+            if sid is None:
+                continue
+            sid = str(sid)
+            assigned_ids.append(sid)
             if sid in session_map:
                 speaker = session_map[sid]["speakers"]
                 if speaker in speakers_in_slot:
@@ -377,7 +424,7 @@ def compute_track_stats(schedule, sessions):
         tracks = [
             session_map[str(sid)]["track"]
             for sid in schedule[slot_name]
-            if str(sid) in session_map
+            if sid is not None and str(sid) in session_map
         ]
         counts = Counter(tracks)
         stats[slot_name] = counts
@@ -406,10 +453,13 @@ def write_csv(schedule, sessions):
         for i, slot_key in enumerate(slot_keys[:4]):
             row = [SLOT_TIMES[i]]
             for sid in schedule[slot_key]:
-                s = session_map.get(str(sid))
-                row.append(
-                    f"{s['title']} - {s['speakers']}" if s else f"Unknown ({sid})"
-                )
+                if sid is None:
+                    row.append("")
+                else:
+                    s = session_map.get(str(sid))
+                    row.append(
+                        f"{s['title']} - {s['speakers']}" if s else f"Unknown ({sid})"
+                    )
             writer.writerow(row)
 
         writer.writerow(["12:15pm - 01:00pm | Lunch"] + ["Lunch"] * 8)
@@ -418,10 +468,13 @@ def write_csv(schedule, sessions):
         for i, slot_key in enumerate(slot_keys[4:]):
             row = [SLOT_TIMES[4 + i]]
             for sid in schedule[slot_key]:
-                s = session_map.get(str(sid))
-                row.append(
-                    f"{s['title']} - {s['speakers']}" if s else f"Unknown ({sid})"
-                )
+                if sid is None:
+                    row.append("")
+                else:
+                    s = session_map.get(str(sid))
+                    row.append(
+                        f"{s['title']} - {s['speakers']}" if s else f"Unknown ({sid})"
+                    )
             writer.writerow(row)
 
         writer.writerow(
