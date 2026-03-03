@@ -31,8 +31,7 @@ These speakers had 100-149 attendance in 2025 and should prefer Rooms 2 or 6:
 
 Slot reference: morning = slots 1-4 (08:30-12:15), afternoon = slots 5-7 (02:00-04:45)
 
-_(No time slot preferences currently set. Add entries like:)_
-<!-- - **Speaker Name** — prefers morning / prefers afternoon -->
+- **Chris DeMars** — both sessions before noon (slots 1-4)
 
 ## Unavailable Slots
 
@@ -45,6 +44,12 @@ These speakers should NOT be scheduled in the same time slot as each other:
 
 _(No conflict preferences currently set. Add entries like:)_
 <!-- - **Speaker A** should not compete with **Speaker B** (similar topics) -->
+
+## Session Ordering
+
+These sessions should be scheduled in a specific order within the day:
+
+- **Hazel Bohon** — "Microservices for Pragmatists" should be scheduled BEFORE "Boiling The Frog: Implementing a Modern Message Based Architecture Without Anyone Noticing" (the first talk covers general microservices/distributed architecture; the second focuses specifically on messaging patterns)
 
 ## Additional Notes
 
