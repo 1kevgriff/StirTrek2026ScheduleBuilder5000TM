@@ -150,6 +150,37 @@
   .capacity-bar { width: 100%; height: 3px; background: #e2e8f0; border-radius: 2px; margin-top: 4px; overflow: hidden; }
   .capacity-fill { height: 100%; border-radius: 2px; background: #f59e0b; }
 
+  /* ── Tab bar ── */
+  .tab-bar {
+    display: flex; justify-content: center; gap: 0; margin-bottom: 16px;
+  }
+  .tab-btn {
+    padding: 10px 24px; border: 2px solid #e2e8f0; background: white;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    color: #64748b;
+  }
+  .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+  .tab-btn:last-child { border-radius: 0 8px 8px 0; }
+  .tab-btn:not(:first-child) { border-left: none; }
+  .tab-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
+  .tab-btn:hover:not(.active) { background: #f1f5f9; color: #334155; }
+
+  /* ── Preferences panel ── */
+  .preferences-panel {
+    display: none; max-width: 800px; margin: 0 auto;
+    background: white; border-radius: 12px; padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  }
+  .preferences-panel.visible { display: block; }
+  .preferences-panel h2 { font-size: 1.4rem; color: #0f172a; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+  .preferences-panel h3 { font-size: 1.1rem; color: #1e293b; margin: 20px 0 8px; }
+  .preferences-panel h4 { font-size: 0.95rem; color: #334155; margin: 16px 0 6px; }
+  .preferences-panel p { font-size: 0.88rem; color: #475569; line-height: 1.6; margin-bottom: 8px; }
+  .preferences-panel ul { margin: 8px 0 12px 20px; }
+  .preferences-panel li { font-size: 0.88rem; color: #475569; line-height: 1.7; }
+  .preferences-panel strong { color: #0f172a; }
+  .preferences-panel em { color: #94a3b8; }
+
   /* ── Diff highlights ── */
   .diff-highlight { outline: 3px solid #f59e0b; outline-offset: -3px; background: #fffbeb !important; }
 
@@ -194,7 +225,7 @@
   @media (max-width: 1200px) { .schedule-grid { font-size: 0.85em; } }
   @media print {
     body { padding: 0; background: white; }
-    .filter-bar, .version-bar, .version-description, .changes-bar, .swap-log { display: none !important; }
+    .filter-bar, .version-bar, .version-description, .changes-bar, .swap-log, .tab-bar, .preferences-panel { display: none !important; }
     .session-cell { cursor: default; }
     .session-cell:hover { transform: none; box-shadow: none; }
   }
@@ -212,6 +243,12 @@
 </div>
 <div class="version-description" id="version-desc"></div>
 
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="schedule">Schedule</button>
+  <button class="tab-btn" data-tab="preferences">Speaker Preferences</button>
+</div>
+
+<div id="schedule-tab">
 <div class="changes-bar" id="changes-bar">
   <span class="changes-count" id="changes-count">0 changes</span>
   <button class="btn-undo" id="undo-btn">Undo Last</button>
@@ -251,6 +288,9 @@
 </div>
 
 <div class="stats" id="stats"></div>
+</div><!-- end schedule-tab -->
+
+<div class="preferences-panel" id="preferences-tab"></div>
 
 <script>
 // ─── Injected Data (replaced by schedule_builder.py) ───
@@ -258,6 +298,7 @@ const rooms = __ROOMS_DATA__;
 const sessions = __SESSIONS_DATA__;
 const versions = __VERSIONS_DATA__;
 const attendance2025 = __ATTENDANCE_DATA__;
+const preferencesMarkdown = __PREFERENCES_DATA__;
 
 // ─── Constants ───
 const maxCapacity = Math.max(...rooms.map(r => r.capacity));
@@ -700,6 +741,70 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
     render();
   });
 });
+
+// ─── Tab Switching ───
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.getElementById("schedule-tab").style.display = tab === "schedule" ? "" : "none";
+    const prefPanel = document.getElementById("preferences-tab");
+    if (tab === "preferences") {
+      prefPanel.classList.add("visible");
+    } else {
+      prefPanel.classList.remove("visible");
+    }
+  });
+});
+
+// ─── Markdown Renderer ───
+function renderMarkdown(md) {
+  const lines = md.split("\n");
+  let html = "";
+  let inList = false;
+  for (let line of lines) {
+    // Strip HTML comments
+    line = line.replace(/<!--[\s\S]*?-->/g, "");
+    // Skip empty lines
+    if (line.trim() === "") {
+      if (inList) { html += "</ul>"; inList = false; }
+      continue;
+    }
+    // Headers
+    if (line.startsWith("# ")) { if (inList) { html += "</ul>"; inList = false; } html += `<h2>${formatInline(line.slice(2))}</h2>`; continue; }
+    if (line.startsWith("## ")) { if (inList) { html += "</ul>"; inList = false; } html += `<h3>${formatInline(line.slice(3))}</h3>`; continue; }
+    if (line.startsWith("### ")) { if (inList) { html += "</ul>"; inList = false; } html += `<h4>${formatInline(line.slice(4))}</h4>`; continue; }
+    // List items
+    if (line.match(/^\s*- /)) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${formatInline(line.replace(/^\s*- /, ""))}</li>`;
+      continue;
+    }
+    // Paragraph
+    if (inList) { html += "</ul>"; inList = false; }
+    html += `<p>${formatInline(line)}</p>`;
+  }
+  if (inList) html += "</ul>";
+  return html;
+}
+
+function formatInline(text) {
+  // Escape HTML first
+  text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // Bold
+  text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  // Italic (after bold)
+  text = text.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  // Inline code
+  text = text.replace(/`(.+?)`/g, '<code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:0.85em">$1</code>');
+  return text;
+}
+
+// Render preferences panel
+document.getElementById("preferences-tab").innerHTML = preferencesMarkdown
+  ? renderMarkdown(preferencesMarkdown)
+  : "<p><em>No speaker preferences file found.</em></p>";
 
 // ─── Init ───
 render();

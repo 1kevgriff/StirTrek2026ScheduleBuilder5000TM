@@ -543,11 +543,15 @@ def write_html(sessions):
         for r in ROOMS
     ]
 
+    # Load speaker preferences for the preferences panel
+    preferences = load_preferences()
+
     html = template
     html = html.replace("__ROOMS_DATA__", json.dumps(rooms_list, indent=2))
     html = html.replace("__SESSIONS_DATA__", json.dumps(sessions_dict, indent=2))
     html = html.replace("__VERSIONS_DATA__", json.dumps(versions, indent=2))
     html = html.replace("__ATTENDANCE_DATA__", json.dumps(ATTENDANCE_2025, indent=2))
+    html = html.replace("__PREFERENCES_DATA__", json.dumps(preferences))
 
     with open(HTML_PATH, "w", encoding="utf-8") as f:
         f.write(html)
