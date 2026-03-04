@@ -32,6 +32,7 @@ These speakers had 100-149 attendance in 2025 and should prefer Rooms 2 or 6:
 Slot reference: morning = slots 1-4 (08:30-12:15), afternoon = slots 5-7 (02:00-04:45)
 
 - **Chris DeMars** — both sessions before noon (slots 1-4)
+- **Kate Holterhoff** — morning only (slots 1-4), flight departure at 7:00 PM
 
 ## Unavailable Slots
 
