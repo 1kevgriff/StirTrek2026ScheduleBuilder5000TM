@@ -96,7 +96,7 @@ ATTENDANCE_2025 = {
 
 def load_sessions():
     wb = load_workbook(EXCEL_PATH, read_only=True)
-    ws = wb["Accepted sessions"]
+    ws = wb["Accepted sessions and speakers"]
 
     headers = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
     col = {name: i for i, name in enumerate(headers)}
@@ -109,11 +109,14 @@ def load_sessions():
         desc = row[col["Description"]] or ""
         if len(desc) > 200:
             desc = desc[:200] + "..."
+        first = row[col["FirstName"]] or ""
+        last = row[col["LastName"]] or ""
+        speaker = f"{first} {last}".strip()
         sessions.append({
             "id": str(session_id),
             "title": row[col["Title"]],
             "description": desc,
-            "speakers": row[col["Speakers"]],
+            "speakers": speaker,
             "track": row[col["Track"]],
         })
 
