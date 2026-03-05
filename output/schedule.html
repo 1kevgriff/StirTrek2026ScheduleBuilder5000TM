@@ -181,6 +181,32 @@
   .preferences-panel strong { color: #0f172a; }
   .preferences-panel em { color: #94a3b8; }
 
+  /* ── Room Capacities panel ── */
+  .rooms-panel {
+    display: none; max-width: 900px; margin: 0 auto;
+    background: white; border-radius: 12px; padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  }
+  .rooms-panel.visible { display: block; }
+  .rooms-panel h2 { font-size: 1.4rem; color: #0f172a; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+  .room-card {
+    display: grid; grid-template-columns: 1fr 120px 1fr; align-items: center;
+    padding: 16px 20px; border-radius: 10px; margin-bottom: 10px;
+    background: #f8fafc; border: 1px solid #e2e8f0; gap: 16px;
+  }
+  .room-card-name { font-weight: 700; font-size: 1.05rem; color: #0f172a; }
+  .room-card-capacity {
+    text-align: center; font-size: 1.8rem; font-weight: 800; color: #f59e0b;
+  }
+  .room-card-capacity small { display: block; font-size: 0.7rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+  .room-card-theaters { font-size: 0.85rem; color: #475569; line-height: 1.6; }
+  .room-card-theaters strong { color: #334155; }
+  .room-card-bar { grid-column: 1 / -1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .room-card-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #f59e0b, #f97316); }
+  .rooms-total { margin-top: 20px; text-align: center; padding: 16px; background: #0f172a; border-radius: 10px; color: white; }
+  .rooms-total .total-value { font-size: 2rem; font-weight: 800; color: #f59e0b; }
+  .rooms-total .total-label { font-size: 0.85rem; color: #94a3b8; }
+
   /* ── Diff highlights ── */
   .diff-highlight { outline: 3px solid #f59e0b; outline-offset: -3px; background: #fffbeb !important; }
 
@@ -245,6 +271,7 @@
 
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="schedule">Schedule</button>
+  <button class="tab-btn" data-tab="rooms">Room Capacities</button>
   <button class="tab-btn" data-tab="preferences">Speaker Preferences</button>
 </div>
 
@@ -289,6 +316,8 @@
 
 <div class="stats" id="stats"></div>
 </div><!-- end schedule-tab -->
+
+<div class="rooms-panel" id="rooms-tab"></div>
 
 <div class="preferences-panel" id="preferences-tab"></div>
 
@@ -1414,6 +1443,84 @@ const versions = [
         "1130963"
       ]
     }
+  },
+  {
+    "version": 11,
+    "label": "Version 11",
+    "description": "8 swaps: room-size adjustments for popular speakers, moved Agents/Arbiters and Vector DBs, Git Config and 150K Lines, Cutting Through Hype and Productivity Theater, Low Risk and PRs to Performance, Claude Code and Blending Product.",
+    "created": "2026-03-05T13:26:18Z",
+    "schedule": {
+      "slot_1": [
+        "1123968",
+        "1120202",
+        "1129069",
+        "1120953",
+        "1128674",
+        "1120223",
+        "1143759",
+        "1127279"
+      ],
+      "slot_2": [
+        "1130675",
+        "1120833",
+        "1127331",
+        "1119405",
+        "1130109",
+        "1127647",
+        "1121367",
+        "1127280"
+      ],
+      "slot_3": [
+        "1143160",
+        "1124045",
+        "1131009",
+        "1130941",
+        "1127143",
+        "1120566",
+        "1121847",
+        "1126202"
+      ],
+      "slot_4": [
+        "1119472",
+        "1127657",
+        "1127053",
+        "1126337",
+        "1124728",
+        "1120257",
+        "1130900",
+        "1128028"
+      ],
+      "slot_5": [
+        "1123967",
+        "1120206",
+        "1129076",
+        "1123888",
+        "1128156",
+        "1121838",
+        "1131005",
+        "1138947"
+      ],
+      "slot_6": [
+        "1123424",
+        "1129837",
+        "1127535",
+        "1124736",
+        "1126556",
+        "1130802",
+        "1130920",
+        "1131041"
+      ],
+      "slot_7": [
+        "1126959",
+        "1120265",
+        "1129012",
+        "1131023",
+        "1126334",
+        "1127299",
+        "1125439",
+        "1130963"
+      ]
+    }
   }
 ];
 const attendance2025 = {
@@ -1885,12 +1992,10 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     const tab = btn.dataset.tab;
     document.getElementById("schedule-tab").style.display = tab === "schedule" ? "" : "none";
+    const roomsPanel = document.getElementById("rooms-tab");
+    if (tab === "rooms") { roomsPanel.classList.add("visible"); } else { roomsPanel.classList.remove("visible"); }
     const prefPanel = document.getElementById("preferences-tab");
-    if (tab === "preferences") {
-      prefPanel.classList.add("visible");
-    } else {
-      prefPanel.classList.remove("visible");
-    }
+    if (tab === "preferences") { prefPanel.classList.add("visible"); } else { prefPanel.classList.remove("visible"); }
   });
 });
 
@@ -1935,6 +2040,28 @@ function formatInline(text) {
   // Inline code
   text = text.replace(/`(.+?)`/g, '<code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:0.85em">$1</code>');
   return text;
+}
+
+// Render rooms panel
+{
+  const panel = document.getElementById("rooms-tab");
+  const totalSeats = rooms.reduce((a, r) => a + r.capacity, 0);
+  let html = '<h2>Room Capacities</h2>';
+  for (const room of rooms) {
+    const pct = (room.capacity / maxCapacity * 100).toFixed(0);
+    html += `
+      <div class="room-card">
+        <div class="room-card-name">${escHtml(room.alias)}</div>
+        <div class="room-card-capacity">${room.capacity}<small>seats</small></div>
+        <div class="room-card-theaters">
+          <strong>Live:</strong> ${escHtml(room.live)}<br>
+          <strong>Simulcast:</strong> ${escHtml(room.simulcast)}
+        </div>
+        <div class="room-card-bar"><div class="room-card-bar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  }
+  html += `<div class="rooms-total"><div class="total-value">${totalSeats.toLocaleString()}</div><div class="total-label">Total seats per time slot</div></div>`;
+  panel.innerHTML = html;
 }
 
 // Render preferences panel
