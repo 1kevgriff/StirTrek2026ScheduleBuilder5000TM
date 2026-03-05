@@ -80,7 +80,6 @@ ATTENDANCE_2025 = {
     "Tristan Chiappisi": 133,
     "Barret Blake": 101,
     "Bob Fornal": 88,
-    "Randy Pagels": 86,
     "Cameron Presley": 78,
     "Kelly Morrison": 75,
     "Amanda Lange": 74,
