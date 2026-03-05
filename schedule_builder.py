@@ -56,14 +56,14 @@ SLOT_TIMES = [
 ]
 
 ROOMS = [
-    {"num": 1, "alias": "Room 1",  "capacity": 388, "live": "Theater 14", "simulcast": "Theaters 12, 13"},
-    {"num": 2, "alias": "Room 2",  "capacity": 314, "live": "Theater 15", "simulcast": "Theaters 10, 11"},
-    {"num": 3, "alias": "Room 3",  "capacity": 228, "live": "Theater 16", "simulcast": "Theater 21"},
-    {"num": 4, "alias": "Room 4",  "capacity": 234, "live": "Theater 17", "simulcast": "Theater 20"},
-    {"num": 5, "alias": "Room 5",  "capacity": 340, "live": "Theater 4",  "simulcast": "Theaters 5,6,7,8,9"},
-    {"num": 6, "alias": "Room 6",  "capacity": 293, "live": "Theater 3",  "simulcast": "Theaters 1, 2"},
-    {"num": 7, "alias": "Room 7",  "capacity": 224, "live": "Theater 27", "simulcast": "Theaters 23,24,25,26"},
-    {"num": 8, "alias": "Room 8",  "capacity": 173, "live": "Theater 28", "simulcast": "Theaters 18, 19"},
+    {"num": 1, "alias": "Room 1",  "capacity": 388, "live": "Theater 14", "live_capacity": 274, "simulcast": "Theaters 12, 13"},
+    {"num": 2, "alias": "Room 2",  "capacity": 314, "live": "Theater 15", "live_capacity": 216, "simulcast": "Theaters 10, 11"},
+    {"num": 3, "alias": "Room 3",  "capacity": 228, "live": "Theater 16", "live_capacity": 203, "simulcast": "Theater 21"},
+    {"num": 4, "alias": "Room 4",  "capacity": 234, "live": "Theater 17", "live_capacity": 187, "simulcast": "Theater 20"},
+    {"num": 5, "alias": "Room 5",  "capacity": 340, "live": "Theater 4",  "live_capacity": 101, "simulcast": "Theaters 5,6,7,8,9"},
+    {"num": 6, "alias": "Room 6",  "capacity": 293, "live": "Theater 3",  "live_capacity": 101, "simulcast": "Theaters 1, 2"},
+    {"num": 7, "alias": "Room 7",  "capacity": 224, "live": "Theater 27", "live_capacity": 79,  "simulcast": "Theaters 23,24,25,26"},
+    {"num": 8, "alias": "Room 8",  "capacity": 173, "live": "Theater 28", "live_capacity": 79,  "simulcast": "Theaters 18, 19"},
 ]
 
 ROOM_NAMES = [f"{r['alias']} ({r['capacity']})" for r in ROOMS]
@@ -541,7 +541,8 @@ def write_html(sessions):
     }
     rooms_list = [
         {"num": r["num"], "alias": r["alias"], "capacity": r["capacity"],
-         "live": r["live"], "simulcast": r["simulcast"].replace("Theaters ", "").replace("Theater ", "")}
+         "live": r["live"], "live_capacity": r["live_capacity"],
+         "simulcast": r["simulcast"].replace("Theaters ", "").replace("Theater ", "")}
         for r in ROOMS
     ]
 
